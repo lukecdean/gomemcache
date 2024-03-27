@@ -23,7 +23,7 @@ func GetInstance() *server {
             serverHost: "localhost",
             serverPort: "3333",
             serverType: "tcp",
-            running:    false
+            running:    false,
         }
     }
     return instance
@@ -40,17 +40,12 @@ func Boot(s *server) {
     // create key value map
     data = make(map[string]string)
 
-    server, err := net.Listen(
-        SERVER_TYPE, SERVER_HOST + ":" + SERVER_PORT
-    )
+    server, err := net.Listen(s.serverType, s.serverHost + ":" + s.serverPort)
     if err != nil {
         fmt.Println("err listening: ", err.Error())
         os.Exit(1)
     } // if err
-    fmt.Println(
-        "server listening on "
-        + SERVER_HOST + ":" + SERVER_PORT
-    )
+    fmt.Println("server listening on " + s.serverHost + ":" + s.serverPort)
 
     defer server.Close()
     s.running = true
@@ -63,7 +58,7 @@ func Boot(s *server) {
             fmt.Println("err accepting: ", err.Error())
             os.Exit(1)
         } // if
-        fmt.Println("client connected: " + connection.RemoteAddr())
+        fmt.Println("client connected: " + connection.RemoteAddr().String())
         go serveClient(connection)
     } // for
 } // main()
@@ -71,9 +66,14 @@ func Boot(s *server) {
 // set members to non-running values
 func cleanUp(s *server) {
     s.running = false
-    s.data = nil
+    data = nil
 } // cleanUp()
 
 // complete requests from a client
 func serveClient(connection net.Conn) {
 } // serveClient()
+
+// honestly a func just for testing
+func Info(s *server) (string) {
+    return s.serverHost
+} // info()

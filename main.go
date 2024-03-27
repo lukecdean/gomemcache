@@ -1,10 +1,12 @@
 package main
 
 import (
-    "server/server"
+    "gomemcache/server"
     "fmt"
 )
 
-func() main {
-    fmt.Printf("running main");
+func main() {
+    s := server.GetInstance()
+    fmt.Println("server host: " + server.Info(s))
+    fmt.Println("running main")
 } // main
