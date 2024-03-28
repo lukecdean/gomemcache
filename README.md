@@ -1,5 +1,5 @@
 ## Basic implementation of memcache in Go to learn the language
-memcache is an in memory key-value store that is interfaced via tcp
+memcache is an in memory key-value store that is interfaced via TCP
 
 ### Goals
 - general familiarity with Go
