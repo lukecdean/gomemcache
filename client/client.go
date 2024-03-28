@@ -45,6 +45,6 @@ func Connect(c client) {
             fmt.Println("err reading: ", err.Error())
         } // if err
 
-        fmt.Println("recieved: ", string(buffer[:mLen]))
+        fmt.Println("recieved:\n", string(buffer[:mLen]))
     } // for 
 } // Connect()
