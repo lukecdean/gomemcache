@@ -1,11 +1,11 @@
 ## Basic implementation of memcache in Go to learn the language
 memcache is an in memory key-value store that is interfaced via TCP
-Start server:   go run main.go s
-Start a client: go run main.go c
-Client commands:
-  set <key> <value>
-  get <key>
-  exit
+- Start server:   go run main.go s
+- Start a client: go run main.go c
+- Client commands:
+  - set <key> <value>
+  - get <key>
+  - exit
 
 ### Goals
 - general familiarity with Go
