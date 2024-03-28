@@ -80,8 +80,9 @@ func cleanUp(s *server) {
     data = nil
 } // cleanUp()
 
+// TODO break this down with helper funcs
 // complete requests from a client
-// format (TODO add help)
+// format
 //  set x y
 //  get x
 func serveClient(connection net.Conn) {
