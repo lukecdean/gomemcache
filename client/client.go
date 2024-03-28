@@ -4,6 +4,7 @@ import (
     "bufio"
     "fmt"
     "net"
+    "os"
 )
 
 type client struct {
@@ -23,13 +24,23 @@ func Connect(c client) {
         panic(err)
     } // if err not nil
 
-    _, err = connection.Write([]byte("Hello, server"))
-    buffer := make([]byte, 1024)
-    mLen, err := connection.Read(buffer)
-    if err != nil {
-        fmt.Println("err reading: ", err.Error())
-    } // if err
+    reader := bufio.NewReader(os.Stdin)
 
-    fmt.Println("recieved: ", string(buffer[:mLen]))
+    for {
+        // take input
+        fmt.Print("-> ")
+        text, _ := reader.ReadString('\n')
+        //text = strings.Replace(text, "\n", "", -1)
+
+        _, err = connection.Write([]byte(text))
+
+        buffer := make([]byte, 1024)
+        mLen, err := connection.Read(buffer)
+        if err != nil {
+            fmt.Println("err reading: ", err.Error())
+        } // if err
+
+        fmt.Println("recieved: ", string(buffer[:mLen]))
+    } // for 
     defer connection.Close()
 } // Connect()

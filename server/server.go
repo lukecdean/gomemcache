@@ -4,6 +4,7 @@ import (
     "fmt"
     "net"
     "os"
+    "strconv"
     "strings"
 )
 
@@ -95,10 +96,64 @@ func serveClient(connection net.Conn) {
             continue
         } // if err reading
 
+        text := string(buffer)
+        // cut the unused characters from the buffer
+        text = text[:strings.Index(text, "\n")]
+        //fmt.Println(strconv.Quote(text)) // debug
+        //text = strings.Replace(text, "\n", "", -1)
+
+        //fmt.Println(string(buffer)) // debug
+
+        //fmt.Println("recieved: " + string(buffer))//debug
+        tokens := strings.Split(text, " ")
+
+        for _, t := range tokens {
+            fmt.Println(strconv.Quote(t))
+        } // for
+
+        switch tokens[0] {
+        case "get":
+            if len(tokens) != 2 {
+                response = "invalid syntax"
+                break
+            } // if
+            fmt.Println("getting v for k: " + tokens[1]) // debug
+            fmt.Printf("size of data: %d\n", len(data)) // debug
+            //fmt.Println("keys of data: " + Keys(data)) // debug
+            for k := range data {
+                fmt.Println(k)
+            } // for k
+            value, ok := data[strings.TrimSpace(tokens[1])]
+            fmt.Printf("value of ok: %t\n", ok) // debug
+            if ok {
+                fmt.Println("value exists and is: " + value) // debug
+                response = "value: " + value
+            } else {
+                response = "value does not exist"
+            }
+        case "set":
+            if len(tokens) != 3 {
+                response = "invalid syntax"
+                break
+            } // if
+            data[strings.TrimSpace(tokens[1])] = tokens[2]
+            fmt.Println("value added:" + data[strings.TrimSpace(tokens[1])]) // debug
+            response = "value " + tokens[1] + " set to: " + data[strings.TrimSpace(tokens[1])]
+        default:
+            response = "invalid command"
+        } // switch opcode
+
+        fmt.Println("sending to client: " + response) // debug
+        _, err = connection.Write([]byte(response))
+        if err != nil {
+            fmt.Println("err writing: ", err.Error())
+        } // if
+
+        /*
         opcode, tokens := parseRequest(buffer)
         switch opcode {
         case C_INVALID:
-            response = "err reading"
+            response = "err reading: parsing error"
         case C_GET:
             response = "value: "
             response += data[tokens[1]]
@@ -108,17 +163,7 @@ func serveClient(connection net.Conn) {
         default:
             response = "err reading"
         } // switch opcode
-
-/*
-        var response string
-        switch msgTokens {
-        case "set":
-            set(msgTokens)
-        case "get":
-            get(msgTokens)
-            default: 
-            response = "invalid request"
-        } // switch msgTokens
+        _, err = connection.Write([]byte(response))
         */
     } // for (recieving loop)
 } // serveClient()
@@ -127,7 +172,7 @@ func serveClient(connection net.Conn) {
 func parseRequest(buffer []byte) (int, [3]string) {
     var tokens [3]string
     // parse the request
-    rawTokens := strings.Split(string(buffer), "\"")
+    rawTokens := strings.Split(string(buffer), " ")
 
     // if not enough tokens
     if len(rawTokens) < 2 {
@@ -162,6 +207,7 @@ func parseRequest(buffer []byte) (int, [3]string) {
         } // if
 
         if extractionFinished {
+            fmt.Println("finished") // debug
             tokens[2] = value
             break
         }
@@ -170,6 +216,7 @@ func parseRequest(buffer []byte) (int, [3]string) {
     if extractionFinished {
         return C_SET, tokens
     } else {
+        fmt.Println("extraction failed") // debug
         return C_INVALID, tokens
     } // if
 } // parseRequest()
