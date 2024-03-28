@@ -138,7 +138,7 @@ func serveClient(connection net.Conn) {
             dataMutex.Unlock()
 
             if ok {
-                response = "value: " + value
+                response = value
             } else {
                 response = "value does not exist"
             }
