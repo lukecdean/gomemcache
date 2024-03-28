@@ -17,9 +17,9 @@ Hardcoded to run on localhost:3333
 - general familiarity with how to program with Go
   - syntax, defer (really cool), 'class' (package) structure, building and running, etc
 - object oriented programming in Go (it's not like Java)
-- using goroutines
-- using net sockets in Go
+- goroutines
+- net/sockets in Go
 - parsing tcp messages
-- using mutexes in Go
-- working with strings in Go
+- mutexes in Go
+- strings in Go
 - singleton design pattern (for the server)
