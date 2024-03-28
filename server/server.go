@@ -4,7 +4,6 @@ import (
     "fmt"
     "net"
     "os"
-    "strconv"
     "strings"
 )
 
@@ -49,6 +48,7 @@ func Boot(s *server) {
     // create key value map
     data = make(map[string]string)
 
+    // set server to listening
     server, err := net.Listen(s.serverType, s.serverHost + ":" + s.serverPort)
     if err != nil {
         fmt.Println("err listening: ", err.Error())
@@ -60,7 +60,7 @@ func Boot(s *server) {
     s.running = true
     defer cleanUp(s)
 
-    // listen for clients
+    // accept clients
     for {
         connection, err := server.Accept()
         if err != nil {
@@ -79,13 +79,20 @@ func cleanUp(s *server) {
 } // cleanUp()
 
 // complete requests from a client
+// format (TODO add help)
+//  set x y
+//  get x
 func serveClient(connection net.Conn) {
     defer connection.Close()
     for {
+        // response var which will eventually be sent to client
         response := "you shouldn't see this"
+
+        // take client's message
         buffer := make([]byte, BUFFER_SIZE)
         mLen, err := connection.Read(buffer)
         if err != nil {
+            // if err
             if err.Error() == "EOF" {
                 fmt.Println("EOF recieved. Closing connection")
                 os.Exit(0)
@@ -96,84 +103,64 @@ func serveClient(connection net.Conn) {
             continue
         } else if mLen == 0 {
             // if the buffer is empty
-            fmt.Println("err reading")
-            response = "err reading"
+            fmt.Println("err reading; buffer empty")
+            response = "err reading; buffer empty"
             continue
         } // if err reading
 
+        // process buffer
         text := string(buffer)
         // cut the unused characters from the buffer
         text = text[:strings.Index(text, "\n")]
-        //fmt.Println(strconv.Quote(text)) // debug
-        //text = strings.Replace(text, "\n", "", -1)
-
-        //fmt.Println(string(buffer)) // debug
-
-        //fmt.Println("recieved: " + string(buffer))//debug
+        // tokenize the request
         tokens := strings.Split(text, " ")
 
+        /*
+        // debug: print literal chars of tokens
         for _, t := range tokens {
             fmt.Println(strconv.Quote(t))
         } // for
+        */
 
+        // switch based off command (first token)
         switch tokens[0] {
         case "get":
             if len(tokens) != 2 {
+                // invalid get syntax
                 response = "invalid syntax"
                 break
             } // if
-            fmt.Println("getting v for k: " + tokens[1]) // debug
-            fmt.Printf("size of data: %d\n", len(data)) // debug
-            //fmt.Println("keys of data: " + Keys(data)) // debug
-            for k := range data {
-                fmt.Println(k)
-            } // for k
+
             value, ok := data[strings.TrimSpace(tokens[1])]
-            fmt.Printf("value of ok: %t\n", ok) // debug
+
             if ok {
-                fmt.Println("value exists and is: " + value) // debug
                 response = "value: " + value
             } else {
                 response = "value does not exist"
             }
         case "set":
             if len(tokens) != 3 {
+                // invalid set syntax
                 response = "invalid syntax"
                 break
             } // if
+
             data[strings.TrimSpace(tokens[1])] = tokens[2]
-            fmt.Println("value added:" + data[strings.TrimSpace(tokens[1])]) // debug
             response = "value " + tokens[1] + " set to: " + data[strings.TrimSpace(tokens[1])]
         default:
-            response = "invalid command"
+            response = "format:\n\tset <k> <v>\n\tget <k>"
         } // switch opcode
 
-        fmt.Println("sending to client: " + response) // debug
+        // send response to the client
         _, err = connection.Write([]byte(response))
         if err != nil {
             fmt.Println("err writing: ", err.Error())
         } // if
-
-        /*
-        opcode, tokens := parseRequest(buffer)
-        switch opcode {
-        case C_INVALID:
-            response = "err reading: parsing error"
-        case C_GET:
-            response = "value: "
-            response += data[tokens[1]]
-        case C_SET:
-            data[tokens[1]] = tokens[2]
-            response = "value " + tokens[1] + " set to: " + data[tokens[1]]
-        default:
-            response = "err reading"
-        } // switch opcode
-        _, err = connection.Write([]byte(response))
-        */
     } // for (recieving loop)
 } // serveClient()
 
 // returns (opcode, tokens {command, K, V})
+// now defunct
 func parseRequest(buffer []byte) (int, [3]string) {
     var tokens [3]string
     // parse the request
@@ -212,7 +199,7 @@ func parseRequest(buffer []byte) (int, [3]string) {
         } // if
 
         if extractionFinished {
-            fmt.Println("finished") // debug
+            //fmt.Println("finished") // debug
             tokens[2] = value
             break
         }
@@ -221,7 +208,7 @@ func parseRequest(buffer []byte) (int, [3]string) {
     if extractionFinished {
         return C_SET, tokens
     } else {
-        fmt.Println("extraction failed") // debug
+        //fmt.Println("extraction failed") // debug
         return C_INVALID, tokens
     } // if
 } // parseRequest()
