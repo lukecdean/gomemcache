@@ -61,7 +61,7 @@ func Boot(s *server) {
         fmt.Println("client connected: " + connection.RemoteAddr().String())
         go serveClient(connection)
     } // for
-} // main()
+} // Boot()
 
 // set members to non-running values
 func cleanUp(s *server) {
@@ -71,6 +71,16 @@ func cleanUp(s *server) {
 
 // complete requests from a client
 func serveClient(connection net.Conn) {
+    buffer := make([]byte, 1024)
+    mLen, err := connection.Read(buffer)
+    if err != nil {
+        fmt.Println("err reading: ", err.Error())
+    } // if err reading
+
+    msg := string(buffer[:mLen])
+    fmt.Println("received: " + msg)
+    _, err = connection.Write([]byte("msg was received: " + msg))
+    connection.Close()
 } // serveClient()
 
 // honestly a func just for testing
