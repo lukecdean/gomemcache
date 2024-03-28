@@ -1,6 +1,7 @@
 package client
 
 import (
+    "bufio"
     "fmt"
     "net"
 )
