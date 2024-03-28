@@ -86,7 +86,12 @@ func serveClient(connection net.Conn) {
         buffer := make([]byte, BUFFER_SIZE)
         mLen, err := connection.Read(buffer)
         if err != nil {
-            fmt.Println("err reading: ", err.Error())
+            if err.Error() == "EOF" {
+                fmt.Println("EOF recieved. Closing connection")
+                os.Exit(0)
+            } else {
+                fmt.Println("err reading: ", err.Error())
+            } // if
             response = "err reading"
             continue
         } else if mLen == 0 {

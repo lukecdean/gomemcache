@@ -23,6 +23,7 @@ func Connect(c client) {
     if err != nil {
         panic(err)
     } // if err not nil
+    defer connection.Close()
 
     reader := bufio.NewReader(os.Stdin)
 
@@ -31,6 +32,10 @@ func Connect(c client) {
         fmt.Print("-> ")
         text, _ := reader.ReadString('\n')
         //text = strings.Replace(text, "\n", "", -1)
+
+        if text == "exit\n" {
+            os.Exit(0)
+        } // if
 
         _, err = connection.Write([]byte(text))
 
@@ -42,5 +47,4 @@ func Connect(c client) {
 
         fmt.Println("recieved: ", string(buffer[:mLen]))
     } // for 
-    defer connection.Close()
 } // Connect()
