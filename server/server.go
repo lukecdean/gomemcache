@@ -40,6 +40,7 @@ func GetInstance() *server {
 }
 
 // boot the server and make it start listening
+// TODO use mutex instead of running bool to ensure only single isntance
 func Boot(s *server) {
     if s.running {
         fmt.Println("server already running")
