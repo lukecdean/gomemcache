@@ -5,6 +5,7 @@ import (
     "net"
     "os"
     "strings"
+    "sync"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 
 var instance    *server
 var data        map[string]string
+var dataMutex   sync.Mutex
 
 type server struct {
     serverHost  string // "localhost"
@@ -95,7 +97,7 @@ func serveClient(connection net.Conn) {
             // if err
             if err.Error() == "EOF" {
                 fmt.Println("EOF recieved. Closing connection")
-                os.Exit(0)
+                return
             } else {
                 fmt.Println("err reading: ", err.Error())
             } // if
@@ -131,7 +133,9 @@ func serveClient(connection net.Conn) {
                 break
             } // if
 
+            dataMutex.Lock()
             value, ok := data[strings.TrimSpace(tokens[1])]
+            dataMutex.Unlock()
 
             if ok {
                 response = "value: " + value
@@ -145,8 +149,10 @@ func serveClient(connection net.Conn) {
                 break
             } // if
 
+            dataMutex.Lock()
             data[strings.TrimSpace(tokens[1])] = tokens[2]
             response = "value " + tokens[1] + " set to: " + data[strings.TrimSpace(tokens[1])]
+            dataMutex.Unlock()
         default:
             response = "format:\n\tset <k> <v>\n\tget <k>"
         } // switch opcode
